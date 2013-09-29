@@ -1,0 +1,52 @@
+diff --git a/src/Yate.pm b/src/Yate.pm
+index ef6ae15..39ad5ea 100644
+--- a/src/Yate.pm
++++ b/src/Yate.pm
+@@ -349,8 +349,9 @@ sub parse_message($$) {
+ 
+ 	# Now handle params (if any).
+ 	if ($#split_line > $#{$headers{$header}}) {
+-	    foreach (split(/:/, $split_line[$#split_line])) {
+-		my ($key, $value) = split(/=/, $_, 2);
++		## Replace $_ with $line
++	    foreach my $line (split(/:/, $split_line[$#split_line])) {
++		my ($key, $value) = split(/=/, $line, 2);
+ 
+ 		if ($key) {
+ 		    $msg_params->{$self->unescape($key)} = $self->unescape($value);
+@@ -459,8 +460,9 @@ sub dispatch($) {
+     # It's not a message, check for 'keyword' binded handlers.
+     if ($self->header('keyword') ne 'message') {
+ 	if (exists($self->{'_handlers'}->{$self->header('keyword')})) {
+-	    foreach (@{$self->{'_handlers'}->{$self->header('keyword')}}) {
+-		$_->($self);
++	    ## Replace $_ with $handler
++	    foreach my $handler (@{$self->{'_handlers'}->{$self->header('keyword')}}) {
++		$handler->($self);
+ 	    }
+ 	}
+ 
+@@ -480,8 +482,9 @@ sub dispatch($) {
+ 	}
+ 
+ 	if (exists($self->{$type}->{$self->header('name')})) {
+-	    foreach (@{$self->{$type}->{$self->header('name')}}) {
+-		$_->($self);
++		## Replace $_ with $header
++	    foreach my $header (@{$self->{$type}->{$self->header('name')}}) {
++		$header->($self);
+ 	    }
+ 	}
+ 
+@@ -494,8 +497,9 @@ sub dispatch($) {
+ 	return 0;
+     }
+ 
+-    foreach (@{$self->{'_handlers'}->{$self->header('name')}}) {
+-	my $return = $_->($self);
++	## Replace $_ with $handler
++    foreach my $handler (@{$self->{'_handlers'}->{$self->header('name')}}) {
++	my $return = $handler->($self);
+ 
+ 	if (defined($return) && lc($return) ne 'false' && $return ne '0') {
+ 	    $self->return_message('true', $return);
