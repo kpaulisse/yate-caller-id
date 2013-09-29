@@ -57,6 +57,19 @@ sub call_preroute_handler {
 	my $message = shift;
 	my ($googlenum, $phonenum) = split(/\//, $message->param('called'));
 	log_message("Call to google number <$googlenum> from phone number <$phonenum>");
+
+	my $prefix = defined $CFG{'PREFIX_STR'} ? $CFG{'PREFIX_STR'} : '00';
+	if (open(my $PF, '<', $CFG{'PREFIX_MAP'})) {
+		my @pf = <$PF>;
+		close ($PF);
+		foreach my $line (@pf) {
+			my ($phone, $pref) = split(/[\s\=]+/, $line);
+			next if $phone ne $googlenum;
+			$prefix = sprintf('%02d', $pref);
+		}
+	}
+	log_message("Prefix set to $prefix");
+
 	if (defined($phonenum) && $phonenum =~ /\d/) {
 
 		# Look up in custom map
@@ -89,10 +102,10 @@ sub call_preroute_handler {
 			$caller = 'Unknown' if !defined($caller);
 		}
 		$message->param('callername', substr($caller, 0, 15));
-		$message->param('caller', $phonenum);
+		$message->param('caller', $prefix . $phonenum);
 	} else {
 		$message->param('callername', 'Invalid');
-		$message->param('caller',     '0000000000');
+		$message->param('caller',     $prefix . '0000000000');
 	}
 	return 1;
 }
