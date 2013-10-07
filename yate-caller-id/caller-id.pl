@@ -10,7 +10,6 @@
 #    either version 1, or (at your option) any later version, or
 # b) the "Artistic License".
 ########################################################################
-
 use strict;
 use lib '/usr/share/yate/scripts';
 use JSON;
@@ -61,7 +60,7 @@ sub call_preroute_handler {
 	my $prefix = defined $CFG{'PREFIX_STR'} ? $CFG{'PREFIX_STR'} : '00';
 	if (open(my $PF, '<', $CFG{'PREFIX_MAP'})) {
 		my @pf = <$PF>;
-		close ($PF);
+		close($PF);
 		foreach my $line (@pf) {
 			my ($phone, $pref) = split(/[\s\=]+/, $line);
 			next if $phone ne $googlenum;
